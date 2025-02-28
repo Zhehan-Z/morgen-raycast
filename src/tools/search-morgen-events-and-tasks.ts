@@ -6,13 +6,13 @@ type Input = {
    * Search query, used to filter events containing specific text in title or description
    */
   query?: string;
-  
+
   /**
    * Search start date (ISO format or relative dates like "today", "tomorrow")
    * Defaults to today
    */
   startDate?: string;
-  
+
   /**
    * Search end date (ISO format or relative dates)
    * Defaults to 7 days after the start date
@@ -34,21 +34,21 @@ interface EventResult {
 
 /**
  * Search events and tasks in Morgen calendar
- * 
+ *
  * This tool allows you to search for events within a specific date range and filter results by keywords.
  */
 export default async function searchMorgenEventsAndTasks(input: Input): Promise<{ events: EventResult[] }> {
   const api = new MorgenAPI();
-  
+
   // Process dates
   const now = new Date();
   let startDate = now;
   let endDate = addDays(now, 7);
-  
+
   if (input.startDate) {
-    if (input.startDate.toLowerCase() === 'today') {
+    if (input.startDate.toLowerCase() === "today") {
       startDate = now;
-    } else if (input.startDate.toLowerCase() === 'tomorrow') {
+    } else if (input.startDate.toLowerCase() === "tomorrow") {
       startDate = addDays(now, 1);
     } else {
       try {
@@ -58,11 +58,11 @@ export default async function searchMorgenEventsAndTasks(input: Input): Promise<
       }
     }
   }
-  
+
   if (input.endDate) {
-    if (input.endDate.toLowerCase() === 'today') {
+    if (input.endDate.toLowerCase() === "today") {
       endDate = now;
-    } else if (input.endDate.toLowerCase() === 'tomorrow') {
+    } else if (input.endDate.toLowerCase() === "tomorrow") {
       endDate = addDays(now, 1);
     } else {
       try {
@@ -76,50 +76,48 @@ export default async function searchMorgenEventsAndTasks(input: Input): Promise<
     // Default search range is 7 days
     endDate = addDays(startDate, 7);
   }
-  
+
   // Ensure start date is not later than end date
   if (startDate > endDate) {
     const temp = startDate;
     startDate = endDate;
     endDate = temp;
   }
-  
+
   // Format as full ISO strings with time component
   const startDateISO = formatISO(startOfDay(startDate));
   const endDateISO = formatISO(endOfDay(endDate));
-  
+
   // Get events
   const events = await api.getEvents(startDateISO, endDateISO);
-  
+
   // Get calendar information for display
   const calendars = await api.getCalendars();
-  const calendarMap = new Map(calendars.map(cal => [cal.id, cal]));
-  
+  const calendarMap = new Map(calendars.map((cal) => [cal.id, cal]));
+
   // Filter events based on the query
-  const filteredEvents = input.query 
-    ? events.filter(event => {
-        const query = input.query?.toLowerCase() || '';
+  const filteredEvents = input.query
+    ? events.filter((event) => {
+        const query = input.query?.toLowerCase() || "";
         const title = event.title.toLowerCase();
-        const description = event.description?.toLowerCase() || '';
+        const description = event.description?.toLowerCase() || "";
         return title.includes(query) || description.includes(query);
       })
     : events;
-  
+
   // Format results
-  const formattedEvents: EventResult[] = filteredEvents.map(event => {
+  const formattedEvents: EventResult[] = filteredEvents.map((event) => {
     // Calculate end time
     const startTime = parseISO(event.start);
     const durationMatch = event.duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
-    const hours = parseInt(durationMatch?.[1] || '0', 10);
-    const minutes = parseInt(durationMatch?.[2] || '0', 10);
+    const hours = parseInt(durationMatch?.[1] || "0", 10);
+    const minutes = parseInt(durationMatch?.[2] || "0", 10);
     const endTime = new Date(startTime.getTime() + (hours * 60 + minutes) * 60 * 1000);
 
     // Format display times
-    const startFormatted = format(startTime, 'yyyy-MM-dd HH:mm');
-    const endFormatted = format(endTime, 'yyyy-MM-dd HH:mm');
-    const durationFormatted = hours > 0 
-      ? `${hours}h ${minutes > 0 ? minutes + 'm' : ''}`
-      : `${minutes}m`;
+    const startFormatted = format(startTime, "yyyy-MM-dd HH:mm");
+    const endFormatted = format(endTime, "yyyy-MM-dd HH:mm");
+    const durationFormatted = hours > 0 ? `${hours}h ${minutes > 0 ? minutes + "m" : ""}` : `${minutes}m`;
 
     // Get calendar information
     const calendar = event.calendarId ? calendarMap.get(event.calendarId) : undefined;
@@ -138,9 +136,9 @@ export default async function searchMorgenEventsAndTasks(input: Input): Promise<
       color,
     };
   });
-  
+
   // Sort by start time
   formattedEvents.sort((a, b) => a.start.localeCompare(b.start));
-  
+
   return { events: formattedEvents };
 }

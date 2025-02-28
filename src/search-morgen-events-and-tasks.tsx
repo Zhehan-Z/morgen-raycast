@@ -1,12 +1,17 @@
-import { ActionPanel, Detail, List, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { MorgenAPI, MorgenEvent } from "./api/morgen";
 
 // Add debug mode constant
 const DEBUG_MODE = false; // Set to true to enable debug mode
 
+// Set Raw Event
+interface RawEventData {
+  [key: string]: unknown;
+}
+
 // Map to store raw event data
-const eventRawDataMap = new Map<string, any>();
+const eventRawDataMap = new Map<string, RawEventData>();
 
 interface UIEvent {
   id: string;
@@ -18,6 +23,17 @@ interface UIEvent {
   calendarId?: string;
   calendarName?: string;
   isTask: boolean; // Add field to identify if it's a task
+}
+
+// Expand on MorgenEvent to include additional metadata
+interface ExtendedMorgenEvent extends MorgenEvent {
+  "@type"?: string;
+  "morgen.so:metadata"?: {
+    location?: string;
+    categoryColor?: string;
+    taskId?: string;
+    [key: string]: unknown;
+  };
 }
 
 interface State {
@@ -60,13 +76,15 @@ export default function Command() {
         let defaultSelectedId: string | undefined;
 
         sorted.forEach((event) => {
-          if ((event as any)["@type"] === "Frame") {
+          const extendedEvent = event as ExtendedMorgenEvent;
+
+          if (extendedEvent["@type"] === "Frame") {
             return;
           }
 
           // Store raw event data for debugging
           if (DEBUG_MODE) {
-            eventRawDataMap.set(event.id, event);
+            eventRawDataMap.set(event.id, event as unknown as RawEventData);
           }
 
           // New timezone handling method
@@ -89,7 +107,7 @@ export default function Command() {
 
           const endDate = new Date(startDate.getTime() + parseDuration(event.duration));
 
-          const metadata = (event as any)["morgen.so:metadata"] || {};
+          const metadata = extendedEvent["morgen.so:metadata"] || {};
           const calendarInfo = calendarMap.get(event.calendarId || "");
           const color = metadata.categoryColor || calendarInfo?.color || "#888888";
           const calendarName = calendarInfo?.name || "Unknown Calendar";
@@ -217,7 +235,7 @@ export default function Command() {
 }
 
 // Add event detail component that supports displaying debug information
-function EventDetailView({ event, rawData }: { event: UIEvent; rawData?: any }) {
+function EventDetailView({ event, rawData }: { event: UIEvent; rawData?: RawEventData }) {
   let markdownContent = `# ${event.title}\n\n`;
 
   if (event.description) {
@@ -296,10 +314,6 @@ function convertTimeZoneToLocal(dateString: string, timeZone: string): Date {
   const sourceMinute = parseInt(sourceTime.split(", ")[1].split(":")[1]);
   const localHour = parseInt(localTime.split(", ")[1].split(":")[0]);
   const localMinute = parseInt(localTime.split(", ")[1].split(":")[1]);
-
-  // Calculate offset (hours)
-  const hourOffset = localHour - sourceHour;
-  const minuteOffset = localMinute - sourceMinute;
 
   // Create correct local date object
   const correctLocalDate = new Date(year, month - 1, day, hours, minutes, seconds || 0);

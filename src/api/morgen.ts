@@ -36,6 +36,19 @@ interface Calendar {
   };
 }
 
+// Avoid Any type
+interface CalendarResponse {
+  id: string;
+  accountId: string;
+  name?: string;
+  color?: string;
+  "morgen.so:metadata"?: {
+    overrideColor?: string;
+    overrideName?: string;
+    busy?: boolean;
+  };
+}
+
 export class MorgenAPI {
   private apiKey: string;
   private baseUrl = "https://api.morgen.so/v3";
@@ -67,7 +80,7 @@ export class MorgenAPI {
 
   // Get all calendars, and return information including accountId
   async getCalendars(): Promise<Calendar[]> {
-    const result = await this.request<{ data: { calendars: any[] } }>(`/calendars/list`);
+    const result = await this.request<{ data: { calendars: CalendarResponse[] } }>(`/calendars/list`);
     return result.data.calendars.map((cal) => ({
       id: cal.id,
       accountId: cal.accountId,

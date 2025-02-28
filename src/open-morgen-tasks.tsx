@@ -1,4 +1,4 @@
-import { open, showHUD, getApplications } from "@raycast/api";
+import { open, showHUD } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 
