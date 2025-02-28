@@ -36,7 +36,7 @@ export default function Command() {
       try {
         const api = new MorgenAPI();
         const calendars = await api.getCalendars();
-        const calendarMap = new Map<string, { color: string, name: string }>();
+        const calendarMap = new Map<string, { color: string; name: string }>();
         calendars.forEach((cal) => {
           const color = cal["morgen.so:metadata"]?.overrideColor || cal.color || "#888888";
           const name = cal["morgen.so:metadata"]?.overrideName || cal.name || "Unknown Calendar";
@@ -71,27 +71,32 @@ export default function Command() {
 
           // New timezone handling method
           let startDate: Date;
-          
+
           // Handle based on timezone type
-          if (!event.timeZone || event.timeZone === "UTC" || event.timeZone === "Etc/UTC" || 
-              event.timeZone === "GMT" || event.timeZone === "Etc/GMT") {
+          if (
+            !event.timeZone ||
+            event.timeZone === "UTC" ||
+            event.timeZone === "Etc/UTC" ||
+            event.timeZone === "GMT" ||
+            event.timeZone === "Etc/GMT"
+          ) {
             // UTC time: Add Z suffix to ensure correct parsing as UTC time, JavaScript will automatically convert to local timezone
             startDate = new Date(event.start + "Z");
           } else {
             // Non-UTC time: Interpret event time as time in specified timezone, then convert to local timezone
             startDate = convertTimeZoneToLocal(event.start, event.timeZone);
           }
-          
+
           const endDate = new Date(startDate.getTime() + parseDuration(event.duration));
 
           const metadata = (event as any)["morgen.so:metadata"] || {};
           const calendarInfo = calendarMap.get(event.calendarId || "");
           const color = metadata.categoryColor || calendarInfo?.color || "#888888";
           const calendarName = calendarInfo?.name || "Unknown Calendar";
-          
+
           // Determine if it's a task
           const isTask = metadata.taskId !== undefined;
-          
+
           const uiEvent: UIEvent = {
             id: event.id,
             title: event.title,
@@ -107,7 +112,7 @@ export default function Command() {
           if (endDate < now) {
             pastEvents.push(uiEvent);
           } else {
-            if (!defaultSelectedId && (startDate <= now && endDate >= now)) {
+            if (!defaultSelectedId && startDate <= now && endDate >= now) {
               defaultSelectedId = event.id;
             }
             upcomingEvents.push(uiEvent);
@@ -129,17 +134,13 @@ export default function Command() {
   if (state.error) {
     return (
       <List>
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Failed to load events"
-          description={state.error.message}
-        />
+        <List.EmptyView icon={Icon.ExclamationMark} title="Failed to load events" description={state.error.message} />
       </List>
     );
   }
 
   const formatLocalTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false });
+    return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false });
   };
 
   return (
@@ -152,9 +153,9 @@ export default function Command() {
               <List.Item
                 key={event.id}
                 id={event.id}
-                icon={{ 
-                  source: event.isTask ? Icon.CheckCircle : Icon.Calendar, 
-                  tintColor: event.calendarColor 
+                icon={{
+                  source: event.isTask ? Icon.CheckCircle : Icon.Calendar,
+                  tintColor: event.calendarColor,
                 }}
                 title={event.title}
                 subtitle={`${formatLocalTime(event.startTime)} - ${formatLocalTime(event.endTime)}`}
@@ -164,9 +165,9 @@ export default function Command() {
                     <Action.Push
                       title="Show Details"
                       target={
-                        <EventDetailView 
-                          event={event} 
-                          rawData={DEBUG_MODE ? eventRawDataMap.get(event.id) : undefined} 
+                        <EventDetailView
+                          event={event}
+                          rawData={DEBUG_MODE ? eventRawDataMap.get(event.id) : undefined}
                         />
                       }
                     />
@@ -177,7 +178,7 @@ export default function Command() {
           })}
         </List.Section>
       )}
-      
+
       {/* Past Section */}
       {state.pastEvents.length > 0 && (
         <List.Section title="Past">
@@ -186,9 +187,9 @@ export default function Command() {
               <List.Item
                 key={event.id}
                 id={event.id}
-                icon={{ 
-                  source: event.isTask ? Icon.CheckCircle : Icon.Clock, 
-                  tintColor: event.calendarColor 
+                icon={{
+                  source: event.isTask ? Icon.CheckCircle : Icon.Clock,
+                  tintColor: event.calendarColor,
                 }}
                 title={event.title}
                 subtitle={`${formatLocalTime(event.startTime)} - ${formatLocalTime(event.endTime)}`}
@@ -198,9 +199,9 @@ export default function Command() {
                     <Action.Push
                       title="Show Details"
                       target={
-                        <EventDetailView 
-                          event={event} 
-                          rawData={DEBUG_MODE ? eventRawDataMap.get(event.id) : undefined} 
+                        <EventDetailView
+                          event={event}
+                          rawData={DEBUG_MODE ? eventRawDataMap.get(event.id) : undefined}
                         />
                       }
                     />
@@ -216,13 +217,13 @@ export default function Command() {
 }
 
 // Add event detail component that supports displaying debug information
-function EventDetailView({ event, rawData }: { event: UIEvent, rawData?: any }) {
+function EventDetailView({ event, rawData }: { event: UIEvent; rawData?: any }) {
   let markdownContent = `# ${event.title}\n\n`;
-  
+
   if (event.description) {
     markdownContent += `${event.description}\n\n`;
   }
-  
+
   markdownContent += `**Time**: ${event.startTime.toLocaleString()} - ${event.endTime.toLocaleString()}\n\n`;
   markdownContent += `**Calendar**: ${event.calendarName || "Unknown Calendar"}`;
 
@@ -243,71 +244,66 @@ function convertTimeZoneToLocal(dateString: string, timeZone: string): Date {
   const [datePart, timePart] = dateString.split("T");
   const [year, month, day] = datePart.split("-").map(Number);
   const [hours, minutes, seconds] = timePart.split(":").map(Number);
-  
+
   // Get current system timezone
   const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  
+
   // Create object representing specified date and time in source timezone
-  const eventDate = new Date(Date.UTC(
-    year,
-    month - 1, // Months are 0-11
-    day,
-    hours,
-    minutes,
-    seconds || 0
-  ));
-  
+  const eventDate = new Date(
+    Date.UTC(
+      year,
+      month - 1, // Months are 0-11
+      day,
+      hours,
+      minutes,
+      seconds || 0,
+    ),
+  );
+
   // Format using source timezone
-  const sourceFormatter = new Intl.DateTimeFormat('en-US', {
+  const sourceFormatter = new Intl.DateTimeFormat("en-US", {
     timeZone,
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
     hour12: false,
-    timeZoneName: 'short'
+    timeZoneName: "short",
   });
-  
+
   // Format using local timezone
-  const localFormatter = new Intl.DateTimeFormat('en-US', {
+  const localFormatter = new Intl.DateTimeFormat("en-US", {
     timeZone: localTimeZone,
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
     hour12: false,
-    timeZoneName: 'short'
+    timeZoneName: "short",
   });
-  
+
   // Calculate timezone offset (this method isn't the most accurate, but works for most cases)
   // Get ISO strings for both timezones
   const sourceTime = sourceFormatter.format(eventDate);
   const localTime = localFormatter.format(eventDate);
-  
+
   // Parse hours and minutes
   const sourceHour = parseInt(sourceTime.split(", ")[1].split(":")[0]);
   const sourceMinute = parseInt(sourceTime.split(", ")[1].split(":")[1]);
   const localHour = parseInt(localTime.split(", ")[1].split(":")[0]);
   const localMinute = parseInt(localTime.split(", ")[1].split(":")[1]);
-  
+
   // Calculate offset (hours)
   const hourOffset = localHour - sourceHour;
   const minuteOffset = localMinute - sourceMinute;
-  
+
   // Create correct local date object
-  const correctLocalDate = new Date(
-    year, 
-    month - 1, 
-    day,
-    hours, 
-    minutes, 
-    seconds || 0
-  );
-  
+  const correctLocalDate = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+
   return correctLocalDate;
 }
 

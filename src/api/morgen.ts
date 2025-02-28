@@ -11,11 +11,11 @@ export interface MorgenEvent {
   id: string;
   title: string;
   description?: string;
-  start: string;      // ISO8601 datetime, e.g., "2023-03-01T10:15:00"
-  duration: string;   // ISO8601 duration, e.g., "PT25M"
-  timeZone?: string;  // Optional timezone, e.g., "Europe/Berlin"
+  start: string; // ISO8601 datetime, e.g., "2023-03-01T10:15:00"
+  duration: string; // ISO8601 duration, e.g., "PT25M"
+  timeZone?: string; // Optional timezone, e.g., "Europe/Berlin"
   calendarId?: string; // Add missing field to identify the calendar this event belongs to
-  location?: string;  // Actual location information
+  location?: string; // Actual location information
   "morgen.so:metadata"?: {
     location?: string;
     categoryColor?: string;
@@ -28,7 +28,7 @@ interface Calendar {
   id: string;
   accountId: string;
   name: string;
-  color?: string;  // Add color field
+  color?: string; // Add color field
   "morgen.so:metadata"?: {
     overrideColor?: string;
     overrideName?: string;
@@ -73,7 +73,7 @@ export class MorgenAPI {
       accountId: cal.accountId,
       name: cal.name || "Unknown Calendar",
       color: cal.color,
-      "morgen.so:metadata": cal["morgen.so:metadata"]
+      "morgen.so:metadata": cal["morgen.so:metadata"],
     }));
   }
 
@@ -94,7 +94,7 @@ export class MorgenAPI {
     }
     const { accountId } = calendars[0];
     const calendarIds = calendars.map((calendar) => calendar.id).join(",");
-    
+
     const queryParams = new URLSearchParams();
     queryParams.append("accountId", accountId);
     queryParams.append("calendarIds", calendarIds);

@@ -10,22 +10,23 @@ With seamless search functionality, you can efficiently navigate your schedule a
 
 Haven't subscribed to Morgen Calendar? Start with a free trial using [this link](https://www.morgen.so/?ref=yzq5y2z).
 
-*While we currently do not support direct task creation and management due to Morgen’s API limitations, we are actively engaging with Morgen to enhance API capabilities, aiming to bring full task, event, and AI scheduling support in the future.*
+_While we currently do not support direct task creation and management due to Morgen’s API limitations, we are actively engaging with Morgen to enhance API capabilities, aiming to bring full task, event, and AI scheduling support in the future._
 
 ## Roadmap
+
 - API Expansion & Feature Requests
-    - Enable task/event creation and updates via API.
-    - Provide AI-driven scheduling functionalities accessible from Raycast.
+  - Enable task/event creation and updates via API.
+  - Provide AI-driven scheduling functionalities accessible from Raycast.
 - Enhanced Search Capabilities
-    - Extend search range beyond 7 days. *(Currently limited to avoid hitting rate limits)*
-    - Cache events data on device and update automatically.
-    - Improve filtering and sorting options for better organization.
+  - Extend search range beyond 7 days. _(Currently limited to avoid hitting rate limits)_
+  - Cache events data on device and update automatically.
+  - Improve filtering and sorting options for better organization.
 - Task Management Improvements
-    - Implement task creation and editing (pending API support).
-    - Add quick task shortcuts for instant scheduling.
+  - Implement task creation and editing (pending API support).
+  - Add quick task shortcuts for instant scheduling.
 - Event Management Enhancements
-    - Enable direct event creation and modifications (pending *better* API support).
-	- Allow quick RSVP actions for event invitations. (WIP)
+  - Enable direct event creation and modifications (pending _better_ API support).
+  - Allow quick RSVP actions for event invitations. (WIP)
     - Better Integration with Morgen Scheduler (pending API support).
 
 This roadmap will evolve as we continue working with Morgen and exploring new possibilities. Stay tuned for updates!
