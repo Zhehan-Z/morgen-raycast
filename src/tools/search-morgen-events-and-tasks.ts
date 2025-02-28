@@ -1,4 +1,4 @@
-import { MorgenAPI, MorgenEvent } from "../api/morgen";
+import { MorgenAPI } from "../api/morgen";
 import { addDays, formatISO, parseISO, format, startOfDay, endOfDay } from "date-fns";
 
 type Input = {

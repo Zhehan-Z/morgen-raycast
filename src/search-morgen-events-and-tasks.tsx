@@ -304,16 +304,19 @@ function convertTimeZoneToLocal(dateString: string, timeZone: string): Date {
     timeZoneName: "short",
   });
 
+  // 以下代码用于计算时区偏移但未被使用，可以删除
   // Calculate timezone offset (this method isn't the most accurate, but works for most cases)
   // Get ISO strings for both timezones
-  const sourceTime = sourceFormatter.format(eventDate);
-  const localTime = localFormatter.format(eventDate);
+  sourceFormatter.format(eventDate);
+  localFormatter.format(eventDate);
 
-  // Parse hours and minutes
-  const sourceHour = parseInt(sourceTime.split(", ")[1].split(":")[0]);
-  const sourceMinute = parseInt(sourceTime.split(", ")[1].split(":")[1]);
-  const localHour = parseInt(localTime.split(", ")[1].split(":")[0]);
-  const localMinute = parseInt(localTime.split(", ")[1].split(":")[1]);
+  // 删除未使用的变量解析代码
+  // const sourceTime = sourceFormatter.format(eventDate);
+  // const localTime = localFormatter.format(eventDate);
+  // const sourceHour = parseInt(sourceTime.split(", ")[1].split(":")[0]);
+  // const sourceMinute = parseInt(sourceTime.split(", ")[1].split(":")[1]);
+  // const localHour = parseInt(localTime.split(", ")[1].split(":")[0]);
+  // const localMinute = parseInt(localTime.split(", ")[1].split(":")[1]);
 
   // Create correct local date object
   const correctLocalDate = new Date(year, month - 1, day, hours, minutes, seconds || 0);
